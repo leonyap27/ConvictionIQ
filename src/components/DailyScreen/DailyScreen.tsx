@@ -217,7 +217,7 @@ function TableSkeleton() {
 function EmptyState() {
   return (
     <div className="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
-      No tickers loaded — upload or refresh mock data.
+      No tickers loaded — load local mock data.
     </div>
   );
 }
