@@ -2,11 +2,7 @@
 
 export type ColorBand = "SuperGreen" | "LightGreen" | "Pink" | "SuperRed";
 export type SignalLabel =
-  | "SELL PUT"
-  | "WATCH"
-  | "WATCHLIST"
-  | "AVOID"
-  | "EXIT ALERT";
+  "SELL PUT" | "WATCH" | "WATCHLIST" | "AVOID" | "EXIT ALERT";
 export type Strategy = "Cash-Secured Put" | "Long Equity" | "Covered Call";
 export type Regime = "Bullish" | "Neutral" | "Bearish";
 export type DecisionLabel =
@@ -157,3 +153,40 @@ export interface MonitoringLogEntry {
   exitAlertActive: boolean;
   summary: string;
 }
+
+// Scoring inputs (price, regime, ichimoku, options) are already embedded in
+// DailySnapshot — no separate ScoringInputs type is needed for the prototype.
+
+export type BriefingCategory =
+  | "new-setup"
+  | "improved"
+  | "weakened"
+  | "review-trigger"
+  | "exit-alert"
+  | "income";
+
+export type BriefingItem =
+  | { category: "new-setup"; snapshot: DailySnapshot }
+  | { category: "income"; snapshot: DailySnapshot }
+  | {
+      category: "improved";
+      snapshot: DailySnapshot;
+      recommendation: RecommendationRecord;
+      scoreDelta: number;
+    }
+  | {
+      category: "weakened";
+      snapshot: DailySnapshot;
+      recommendation: RecommendationRecord;
+      scoreDelta: number;
+    }
+  | {
+      category: "review-trigger";
+      snapshot: DailySnapshot;
+      recommendation: RecommendationRecord;
+    }
+  | {
+      category: "exit-alert";
+      snapshot: DailySnapshot;
+      recommendation: RecommendationRecord;
+    };

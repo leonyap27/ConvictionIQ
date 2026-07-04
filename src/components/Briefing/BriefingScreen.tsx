@@ -3,7 +3,7 @@ import { useSnapshots, useRecommendations, useTickers } from "@/hooks/use-data";
 import { BandChip, SignalChip } from "@/components/Chips";
 import { StudyCardDrawer } from "@/components/DailyScreen/StudyCardDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DailySnapshot, RecommendationRecord } from "@/lib/types";
+import type { BriefingItem } from "@/lib/types";
 import {
   TrendingUp,
   TrendingDown,
@@ -28,47 +28,72 @@ export function BriefingScreen() {
     if (!snapshots)
       return {
         health: null,
-        newSetups: [],
-        improved: [],
-        weakened: [],
-        review: [],
-        exitAlerts: [],
-        income: [],
+        newSetups: [] as Extract<BriefingItem, { category: "new-setup" }>[],
+        improved: [] as Extract<BriefingItem, { category: "improved" }>[],
+        weakened: [] as Extract<BriefingItem, { category: "weakened" }>[],
+        review: [] as Extract<BriefingItem, { category: "review-trigger" }>[],
+        exitAlerts: [] as Extract<BriefingItem, { category: "exit-alert" }>[],
+        income: [] as Extract<BriefingItem, { category: "income" }>[],
       };
     const snapByTicker = new Map(snapshots.map((s) => [s.ticker, s]));
     const active = recommendations.filter((r) => r.status !== "Closed");
     const savedTickers = new Set(active.map((r) => r.ticker));
 
-    const newSetups = snapshots
-      .filter(
-        (s) =>
-          (s.colorBand === "SuperGreen" || s.colorBand === "LightGreen") &&
-          !savedTickers.has(s.ticker),
-      )
-      .sort((a, b) => b.compositeScore - a.compositeScore)
-      .slice(0, 10);
+    const newSetups: Extract<BriefingItem, { category: "new-setup" }>[] =
+      snapshots
+        .filter(
+          (s) =>
+            (s.colorBand === "SuperGreen" || s.colorBand === "LightGreen") &&
+            !savedTickers.has(s.ticker),
+        )
+        .sort((a, b) => b.compositeScore - a.compositeScore)
+        .slice(0, 10)
+        .map((snapshot) => ({ category: "new-setup" as const, snapshot }));
 
-    const improved: Array<{ rec: RecommendationRecord; snap: DailySnapshot; delta: number }> = [];
-    const weakened: Array<{ rec: RecommendationRecord; snap: DailySnapshot; delta: number }> = [];
-    const review: Array<{ rec: RecommendationRecord; snap: DailySnapshot }> = [];
-    const exitAlerts: Array<{ rec: RecommendationRecord; snap: DailySnapshot }> = [];
+    const improved: Extract<BriefingItem, { category: "improved" }>[] = [];
+    const weakened: Extract<BriefingItem, { category: "weakened" }>[] = [];
+    const review: Extract<BriefingItem, { category: "review-trigger" }>[] = [];
+    const exitAlerts: Extract<BriefingItem, { category: "exit-alert" }>[] = [];
 
-    for (const rec of active) {
-      const snap = snapByTicker.get(rec.ticker);
-      if (!snap) continue;
-      const delta = snap.compositeScore - rec.scoreAtEntry;
-      if (delta > 3) improved.push({ rec, snap, delta });
-      if (delta < -3) weakened.push({ rec, snap, delta });
-      if (snap.exitAlertActive) exitAlerts.push({ rec, snap });
+    for (const recommendation of active) {
+      const snapshot = snapByTicker.get(recommendation.ticker);
+      if (!snapshot) continue;
+      const scoreDelta = snapshot.compositeScore - recommendation.scoreAtEntry;
+      if (scoreDelta > 3)
+        improved.push({
+          category: "improved" as const,
+          snapshot,
+          recommendation,
+          scoreDelta,
+        });
+      if (scoreDelta < -3)
+        weakened.push({
+          category: "weakened" as const,
+          snapshot,
+          recommendation,
+          scoreDelta,
+        });
+      if (snapshot.exitAlertActive)
+        exitAlerts.push({
+          category: "exit-alert" as const,
+          snapshot,
+          recommendation,
+        });
       // Review trigger: price within 1% of Kijun
-      const nearKijun = Math.abs(snap.kijunDistancePct) < 1;
-      if (nearKijun) review.push({ rec, snap });
+      const nearKijun = Math.abs(snapshot.kijunDistancePct) < 1;
+      if (nearKijun)
+        review.push({
+          category: "review-trigger" as const,
+          snapshot,
+          recommendation,
+        });
     }
 
-    const income = snapshots
+    const income: Extract<BriefingItem, { category: "income" }>[] = snapshots
       .filter((s) => s.signalLabel === "SELL PUT")
       .sort((a, b) => b.yieldPct - a.yieldPct)
-      .slice(0, 8);
+      .slice(0, 8)
+      .map((snapshot) => ({ category: "income" as const, snapshot }));
 
     return {
       health: {
@@ -96,7 +121,8 @@ export function BriefingScreen() {
     );
   }
 
-  const noActive = recommendations.filter((r) => r.status !== "Closed").length === 0;
+  const noActive =
+    recommendations.filter((r) => r.status !== "Closed").length === 0;
   const displayDate = (() => {
     try {
       return format(new Date(currentDate), "EEEE, MMMM d yyyy");
@@ -108,7 +134,9 @@ export function BriefingScreen() {
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6 md:px-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Daily Briefing</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Daily Briefing
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">{displayDate}</p>
       </div>
 
@@ -151,16 +179,18 @@ export function BriefingScreen() {
           icon={<AlertOctagon className="h-4 w-4" />}
           highlight
           empty="No exit alerts."
-          items={briefing.exitAlerts.map(({ rec, snap }) => ({
-            key: rec.id,
-            onClick: () => setOpenTicker(snap.ticker),
+          items={briefing.exitAlerts.map(({ snapshot, recommendation }) => ({
+            key: recommendation.id,
+            onClick: () => setOpenTicker(snapshot.ticker),
             content: (
               <>
-                <span className="font-mono font-semibold">{snap.ticker}</span>
-                <span className="text-xs text-muted-foreground">
-                  {snap.kumoDistancePct.toFixed(1)}% from cloud top
+                <span className="font-mono font-semibold">
+                  {snapshot.ticker}
                 </span>
-                <BandChip band={snap.colorBand} />
+                <span className="text-xs text-muted-foreground">
+                  {snapshot.kumoDistancePct.toFixed(1)}% from cloud top
+                </span>
+                <BandChip band={snapshot.colorBand} />
                 <SignalChip signal="EXIT ALERT" />
               </>
             ),
@@ -171,18 +201,25 @@ export function BriefingScreen() {
           title="New High-Quality Setups"
           icon={<Sparkles className="h-4 w-4" />}
           empty="No new SuperGreen or LightGreen setups today."
-          items={briefing.newSetups.map((snap) => ({
-            key: snap.ticker,
-            onClick: () => setOpenTicker(snap.ticker),
+          items={briefing.newSetups.map(({ snapshot }) => ({
+            key: snapshot.ticker,
+            onClick: () => setOpenTicker(snapshot.ticker),
             content: (
               <>
-                <span className="font-mono font-semibold">{snap.ticker}</span>
-                <span className="text-xs text-muted-foreground">
-                  {tickers.find((t) => t.ticker === snap.ticker)?.companyName}
+                <span className="font-mono font-semibold">
+                  {snapshot.ticker}
                 </span>
-                <span className="text-sm tabular">Score {snap.compositeScore}</span>
-                <BandChip band={snap.colorBand} />
-                <SignalChip signal={snap.signalLabel} />
+                <span className="text-xs text-muted-foreground">
+                  {
+                    tickers.find((t) => t.ticker === snapshot.ticker)
+                      ?.companyName
+                  }
+                </span>
+                <span className="text-sm tabular">
+                  Score {snapshot.compositeScore}
+                </span>
+                <BandChip band={snapshot.colorBand} />
+                <SignalChip signal={snapshot.signalLabel} />
               </>
             ),
           }))}
@@ -192,56 +229,66 @@ export function BriefingScreen() {
           title="Improved Recommendations"
           icon={<TrendingUp className="h-4 w-4" />}
           empty="No improved records vs. entry."
-          items={briefing.improved.map(({ rec, snap, delta }) => ({
-            key: rec.id,
-            onClick: () => setOpenTicker(snap.ticker),
-            content: (
-              <>
-                <span className="font-mono font-semibold">{rec.ticker}</span>
-                <span className="text-sm tabular text-band-lightgreen-fg">
-                  +{delta} vs entry
-                </span>
-                <BandChip band={snap.colorBand} />
-                <SignalChip signal={snap.signalLabel} />
-              </>
-            ),
-          }))}
+          items={briefing.improved.map(
+            ({ snapshot, recommendation, scoreDelta }) => ({
+              key: recommendation.id,
+              onClick: () => setOpenTicker(snapshot.ticker),
+              content: (
+                <>
+                  <span className="font-mono font-semibold">
+                    {recommendation.ticker}
+                  </span>
+                  <span className="text-sm tabular text-band-lightgreen-fg">
+                    +{scoreDelta} vs entry
+                  </span>
+                  <BandChip band={snapshot.colorBand} />
+                  <SignalChip signal={snapshot.signalLabel} />
+                </>
+              ),
+            }),
+          )}
         />
 
         <BriefSection
           title="Weakened Recommendations"
           icon={<TrendingDown className="h-4 w-4" />}
           empty="No weakened records."
-          items={briefing.weakened.map(({ rec, snap, delta }) => ({
-            key: rec.id,
-            onClick: () => setOpenTicker(snap.ticker),
-            content: (
-              <>
-                <span className="font-mono font-semibold">{rec.ticker}</span>
-                <span className="text-sm tabular text-band-pink-fg">
-                  {delta} vs entry
-                </span>
-                <BandChip band={snap.colorBand} />
-                <SignalChip signal={snap.signalLabel} />
-              </>
-            ),
-          }))}
+          items={briefing.weakened.map(
+            ({ snapshot, recommendation, scoreDelta }) => ({
+              key: recommendation.id,
+              onClick: () => setOpenTicker(snapshot.ticker),
+              content: (
+                <>
+                  <span className="font-mono font-semibold">
+                    {recommendation.ticker}
+                  </span>
+                  <span className="text-sm tabular text-band-pink-fg">
+                    {scoreDelta} vs entry
+                  </span>
+                  <BandChip band={snapshot.colorBand} />
+                  <SignalChip signal={snapshot.signalLabel} />
+                </>
+              ),
+            }),
+          )}
         />
 
         <BriefSection
           title="Positions Requiring Review"
           icon={<Eye className="h-4 w-4" />}
           empty="No positions at review trigger."
-          items={briefing.review.map(({ rec, snap }) => ({
-            key: rec.id,
-            onClick: () => setOpenTicker(snap.ticker),
+          items={briefing.review.map(({ snapshot, recommendation }) => ({
+            key: recommendation.id,
+            onClick: () => setOpenTicker(snapshot.ticker),
             content: (
               <>
-                <span className="font-mono font-semibold">{rec.ticker}</span>
-                <span className="text-xs text-muted-foreground">
-                  Price at Kijun ({snap.kijunDistancePct.toFixed(1)}%)
+                <span className="font-mono font-semibold">
+                  {recommendation.ticker}
                 </span>
-                <BandChip band={snap.colorBand} />
+                <span className="text-xs text-muted-foreground">
+                  Price at Kijun ({snapshot.kijunDistancePct.toFixed(1)}%)
+                </span>
+                <BandChip band={snapshot.colorBand} />
               </>
             ),
           }))}
@@ -251,17 +298,20 @@ export function BriefingScreen() {
           title="Income Opportunities"
           icon={<DollarSign className="h-4 w-4" />}
           empty="No SELL PUT signals today."
-          items={briefing.income.map((snap) => ({
-            key: snap.ticker,
-            onClick: () => setOpenTicker(snap.ticker),
+          items={briefing.income.map(({ snapshot }) => ({
+            key: snapshot.ticker,
+            onClick: () => setOpenTicker(snapshot.ticker),
             content: (
               <>
-                <span className="font-mono font-semibold">{snap.ticker}</span>
+                <span className="font-mono font-semibold">
+                  {snapshot.ticker}
+                </span>
                 <span className="text-sm tabular">
-                  ${snap.premium.toFixed(2)} @ {snap.yieldPct.toFixed(2)}%
+                  ${snapshot.premium.toFixed(2)} @{" "}
+                  {snapshot.yieldPct.toFixed(2)}%
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {snap.dte} DTE
+                  {snapshot.dte} DTE
                 </span>
                 <SignalChip signal="SELL PUT" />
               </>
