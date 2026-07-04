@@ -15,6 +15,7 @@ import type {
   OptionContract,
   Regime,
   SignalLabel,
+  Strategy,
   TickerData,
 } from "./types";
 
@@ -143,6 +144,11 @@ export function toSignalLabel(
   return "AVOID";
 }
 
+export function toStrategy(signal: SignalLabel): Strategy {
+  if (signal === "SELL PUT") return "Cash-Secured Put";
+  return "Long Equity";
+}
+
 export interface ScoreOptions {
   asOfDate: string;
   historyLength?: number; // slice ohlc up to this length for time-travel
@@ -171,6 +177,7 @@ export function scoreTicker(
 
   const optionValid = !!chosen;
   const signalLabel = toSignalLabel(band, regime, optionValid, exitAlertActive);
+  const strategy = toStrategy(signalLabel);
 
   return {
     ticker: data.ticker,
@@ -183,6 +190,7 @@ export function scoreTicker(
     compositeScore: composite,
     colorBand: band,
     signalLabel,
+    strategy,
     chosenOption: chosen,
     premium: chosen?.premium ?? 0,
     yieldPct: chosen ? (chosen.premium / chosen.strike) * 100 : 0,
