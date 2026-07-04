@@ -208,10 +208,42 @@ function Row({
 
 function TableSkeleton() {
   return (
-    <div className="space-y-2">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full" />
-      ))}
+    <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-card text-xs uppercase text-muted-foreground">
+            <tr>
+              {["Ticker", "Regime", "Tech", "Options", "Composite", "Band", "Signal", "Premium", "Yield %", "DTE", ""].map(
+                (col, i) => (
+                  <th key={i} className="px-3 py-2.5 text-left font-medium tracking-wide">
+                    {col}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <tr key={i} className="transition-colors">
+                <td className="px-3 py-2.5">
+                  <Skeleton className="h-4 w-12 mb-1" />
+                  <Skeleton className="h-3 w-32" />
+                </td>
+                <td className="px-3 py-2.5"><Skeleton className="h-4 w-16" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-8 ml-auto" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-8 ml-auto" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-10 ml-auto" /></td>
+                <td className="px-3 py-2.5"><Skeleton className="h-5 w-20 rounded-md" /></td>
+                <td className="px-3 py-2.5"><Skeleton className="h-5 w-20 rounded-md" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-12 ml-auto" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-10 ml-auto" /></td>
+                <td className="px-3 py-2.5 text-right"><Skeleton className="h-4 w-8 ml-auto" /></td>
+                <td className="px-3 py-2.5" />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
