@@ -61,6 +61,7 @@ export interface DailySnapshot {
   compositeScore: number;
   colorBand: ColorBand;
   signalLabel: SignalLabel;
+  strategy: Strategy;
   chosenOption: OptionContract | null;
   premium: number;
   yieldPct: number;
