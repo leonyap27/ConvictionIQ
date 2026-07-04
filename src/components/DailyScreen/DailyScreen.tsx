@@ -21,6 +21,7 @@ export function DailyScreen() {
   const { data: snapshots, isLoading } = useSnapshots();
   const filterSignal = useAppStore((s) => s.filterSignal);
   const filterBand = useAppStore((s) => s.filterBand);
+  const filterStrategy = useAppStore((s) => s.filterStrategy);
   const [openTicker, setOpenTicker] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -28,8 +29,9 @@ export function DailyScreen() {
     return snapshots
       .filter((s) => filterSignal === "All" || s.signalLabel === filterSignal)
       .filter((s) => filterBand === "All" || s.colorBand === filterBand)
+      .filter((s) => filterStrategy === "All" || s.strategy === filterStrategy)
       .sort((a, b) => b.compositeScore - a.compositeScore);
-  }, [snapshots, filterSignal, filterBand]);
+  }, [snapshots, filterSignal, filterBand, filterStrategy]);
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-6">
