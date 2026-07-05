@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useHoldings } from "@/hooks/use-data";
+import { useHoldings, useSnapshots } from "@/hooks/use-data";
 import { db } from "@/lib/db";
+import { toPortfolioSignal } from "@/lib/scoring";
+import { SignalChip } from "@/components/Chips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +39,7 @@ type FormData = z.infer<typeof schema>;
 
 export function PortfolioScreen() {
   const { data: holdings = [], isLoading } = useHoldings();
+  const { data: snapshots = [] } = useSnapshots();
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -213,11 +216,17 @@ export function PortfolioScreen() {
                 <th className="px-3 py-2 text-left">Sector</th>
                 <th className="px-3 py-2 text-right">Entry Price</th>
                 <th className="px-3 py-2 text-right">Value</th>
+                <th className="px-3 py-2 text-left">Signal</th>
                 <th className="px-3 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {holdings.map((h) => (
+              {holdings.map((h) => {
+                const snap = snapshots.find((s) => s.ticker === h.ticker);
+                const portfolioSignal = snap
+                  ? toPortfolioSignal(snap.kumoDistancePct)
+                  : null;
+                return (
                 <tr key={h.id} className="hover:bg-accent/30">
                   <td className="px-3 py-2 font-mono font-semibold">
                     {h.ticker}
@@ -231,6 +240,13 @@ export function PortfolioScreen() {
                   </td>
                   <td className="px-3 py-2 text-right tabular">
                     ${(h.positionSize * h.entryPrice).toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2">
+                    {portfolioSignal ? (
+                      <SignalChip signal={portfolioSignal} />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right">
                     <Button
@@ -258,7 +274,7 @@ export function PortfolioScreen() {
                     </Button>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         )}

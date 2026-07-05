@@ -3,13 +3,9 @@ import { NAV_ITEMS } from "@/lib/constants";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar, FastForward, Activity, CloudUpload, CloudDownload, Loader2 } from "lucide-react";
+import { Calendar, FastForward, Activity, CloudUpload, CloudDownload } from "lucide-react";
 import { format } from "date-fns";
 import { useIsClient } from "@/hooks/use-is-client";
-import { useState } from "react";
-import { pullServerToLocal, pushLocalToServer } from "@/lib/sync";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function AppHeader() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -17,35 +13,6 @@ export function AppHeader() {
   const advanceDay = useAppStore((s) => s.advanceDay);
   const setCurrentDate = useAppStore((s) => s.setCurrentDate);
   const isClient = useIsClient();
-  const queryClient = useQueryClient();
-  const [syncing, setSyncing] = useState<"push" | "pull" | null>(null);
-
-  const doPush = async () => {
-    setSyncing("push");
-    try {
-      await pushLocalToServer(currentDate);
-      toast.success("Synced to server. Claude will now see the latest state.");
-    } catch (e) {
-      toast.error(`Sync failed: ${(e as Error).message}`);
-    } finally {
-      setSyncing(null);
-    }
-  };
-  const doPull = async () => {
-    setSyncing("pull");
-    try {
-      const res = await pullServerToLocal();
-      if (res.simDate) setCurrentDate(res.simDate);
-      await queryClient.invalidateQueries();
-      toast.success(
-        `Refreshed from server: ${res.counts.recommendations} recs, ${res.counts.holdings} holdings.`,
-      );
-    } catch (e) {
-      toast.error(`Refresh failed: ${(e as Error).message}`);
-    } finally {
-      setSyncing(null);
-    }
-  };
 
   const displayDate = (() => {
     if (!isClient) return "";
@@ -107,21 +74,19 @@ export function AppHeader() {
           <Button
             variant="outline"
             size="sm"
-            onClick={doPush}
-            disabled={syncing !== null}
-            title="Push local state to server so Claude (MCP) sees it"
+            disabled
+            title="Not available in local mode"
           >
-            {syncing === "push" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CloudUpload className="h-3.5 w-3.5" />}
+            <CloudUpload className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Sync</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={doPull}
-            disabled={syncing !== null}
-            title="Refresh local state from server (pulls Claude's changes)"
+            disabled
+            title="Not available in local mode"
           >
-            {syncing === "pull" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CloudDownload className="h-3.5 w-3.5" />}
+            <CloudDownload className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Refresh</span>
           </Button>
           <Button

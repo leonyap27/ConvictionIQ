@@ -6,7 +6,8 @@ import { GATE_CHECK_LABELS_MAP } from "@/components/gate-labels";
 import { BandChip, SignalChip } from "@/components/Chips";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -15,36 +16,98 @@ import {
 } from "@/components/ui/tooltip";
 import { StudyCardDrawer } from "./StudyCardDrawer";
 import { FilterBar } from "./FilterBar";
+import { RulesSettings } from "./RulesSettings";
 import type { DailySnapshot } from "@/lib/types";
 
 export function DailyScreen() {
   const { data: snapshots, isLoading } = useSnapshots();
+  const tickers = useTickers();
+
   const filterSignal = useAppStore((s) => s.filterSignal);
   const filterBand = useAppStore((s) => s.filterBand);
   const filterStrategy = useAppStore((s) => s.filterStrategy);
+  const includedThemes = useAppStore((s) => s.includedThemes);
+  const minCompositeScore = useAppStore((s) => s.minCompositeScore);
+  const excludedTickers = useAppStore((s) => s.excludedTickers);
+  const maxDisplay = useAppStore((s) => s.maxDisplay);
+
   const [openTicker, setOpenTicker] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Build a ticker -> theme map from TickerData for the rules-layer filter
+  const themeByTicker = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const t of tickers) m.set(t.ticker, t.theme);
+    return m;
+  }, [tickers]);
 
   const filtered = useMemo(() => {
     if (!snapshots) return [];
-    return snapshots
+
+    // Rules layer: theme, score floor, exclusions, capped count
+    const rulesFiltered = snapshots
+      .filter((s) => {
+        if (includedThemes.length > 0) {
+          const theme = themeByTicker.get(s.ticker);
+          if (!theme || !includedThemes.includes(theme as never)) return false;
+        }
+        return true;
+      })
+      .filter((s) => s.compositeScore >= minCompositeScore)
+      .filter((s) => !excludedTickers.includes(s.ticker))
+      .sort((a, b) => b.compositeScore - a.compositeScore)
+      .slice(0, maxDisplay);
+
+    // Quick-filter chips on top of the smart list
+    return rulesFiltered
       .filter((s) => filterSignal === "All" || s.signalLabel === filterSignal)
       .filter((s) => filterBand === "All" || s.colorBand === filterBand)
-      .filter((s) => filterStrategy === "All" || s.strategy === filterStrategy)
-      .sort((a, b) => b.compositeScore - a.compositeScore);
-  }, [snapshots, filterSignal, filterBand, filterStrategy]);
+      .filter((s) => filterStrategy === "All" || s.strategy === filterStrategy);
+  }, [
+    snapshots,
+    themeByTicker,
+    includedThemes,
+    minCompositeScore,
+    excludedTickers,
+    maxDisplay,
+    filterSignal,
+    filterBand,
+    filterStrategy,
+  ]);
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-6">
-      <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Daily Screen</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Daily Screen — Opportunity Hunt
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Ranked opportunities scored through the Ichimoku + options engine.
             Click any qualifying row to open its Study Card.
           </p>
         </div>
-        <FilterBar />
+        <div className="flex items-center gap-2">
+          <FilterBar />
+          <Button
+            variant={settingsOpen ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setSettingsOpen((v) => !v)}
+            aria-expanded={settingsOpen}
+            aria-controls="rules-settings-panel"
+            title="Smart-list rules"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">Rules</span>
+          </Button>
+        </div>
       </div>
+
+      {settingsOpen && (
+        <div id="rules-settings-panel" className="mb-4">
+          <RulesSettings />
+        </div>
+      )}
 
       {isLoading ? (
         <TableSkeleton />
@@ -251,7 +314,7 @@ function TableSkeleton() {
 function EmptyState() {
   return (
     <div className="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
-      No tickers loaded — load local mock data.
+      No opportunities match your current rules — adjust the settings above.
     </div>
   );
 }
