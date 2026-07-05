@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { ActionedRecord, AssetClass, CoWorkAnalysis, FollowUpRecord } from "@/lib/types";
+import { toStrategy } from "@/lib/scoring";
 import { ChevronDown, ChevronRight, Inbox, MoveRight, Bell } from "lucide-react";
 
 const ASSET_CLASS_ORDER: AssetClass[] = [
@@ -257,6 +258,11 @@ export function InboxScreen() {
         actioned_at: now,
         action_type: "ledger",
         decision_notes: "",
+        sub_type: toStrategy(r.signal_label),
+        decision_label: "Accepted",
+        score_at_decision: 0,
+        price_at_decision: 0,
+        notes_log: [],
       };
       await db.decisions.add(actioned);
       await db.inbox.delete(r.id);
