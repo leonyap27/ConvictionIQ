@@ -27,7 +27,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-6 px-4 md:px-6">
         <Link
-          to="/"
+          to="/inbox"
           className="flex items-center gap-2 text-sm font-semibold tracking-tight"
         >
           <span className="grid h-7 w-7 place-items-center rounded-md bg-primary/20 text-primary">
@@ -37,10 +37,7 @@ export function AppHeader() {
         </Link>
         <nav className="flex items-center gap-1">
           {NAV_ITEMS.map((item) => {
-            const active =
-              item.path === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.path);
+            const active = pathname.startsWith(item.path);
             return (
               <Link
                 key={item.path}

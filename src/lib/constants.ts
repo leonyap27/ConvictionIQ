@@ -1,19 +1,17 @@
 import type { ColorBand, SignalLabel, Theme } from "./types";
 
 export const ROUTES = {
-  daily: "/",
-  briefing: "/briefing",
-  memory: "/memory",
-  portfolio: "/portfolio",
-  mcpSetup: "/mcp-setup",
+  inbox: "/inbox",
+  ledger: "/ledger",
+  followup: "/followup",
+  queueSettings: "/queue-settings",
 } as const;
 
 export const NAV_ITEMS = [
-  { path: ROUTES.daily, label: "Daily Screen" },
-  { path: ROUTES.briefing, label: "Briefing" },
-  { path: ROUTES.memory, label: "Memory" },
-  { path: ROUTES.portfolio, label: "Portfolio" },
-  { path: ROUTES.mcpSetup, label: "MCP" },
+  { path: ROUTES.inbox, label: "Analysis Inbox" },
+  { path: ROUTES.ledger, label: "Decision Ledger" },
+  { path: ROUTES.followup, label: "Follow-up Queue" },
+  { path: ROUTES.queueSettings, label: "Queue Settings" },
 ] as const;
 
 // Scoring thresholds
