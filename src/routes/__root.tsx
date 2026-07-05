@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "@/components/AppHeader";
 import { Toaster } from "@/components/ui/sonner";
 import { useMonitoringRunner } from "@/hooks/use-monitoring";
+import { seedCoWorkData } from "@/lib/db";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function AppFrame() {
   useMonitoringRunner();
+  useEffect(() => { seedCoWorkData(); }, []);
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />

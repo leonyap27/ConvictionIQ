@@ -9,29 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PortfolioRouteImport } from './routes/portfolio'
-import { Route as MemoryRouteImport } from './routes/memory'
-import { Route as McpSetupRouteImport } from './routes/mcp-setup'
+import { Route as QueueSettingsRouteImport } from './routes/queue-settings'
 import { Route as McpRouteImport } from './routes/mcp'
-import { Route as BriefingRouteImport } from './routes/briefing'
+import { Route as LedgerRouteImport } from './routes/ledger'
+import { Route as InboxRouteImport } from './routes/inbox'
+import { Route as FollowupRouteImport } from './routes/followup'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
-const PortfolioRoute = PortfolioRouteImport.update({
-  id: '/portfolio',
-  path: '/portfolio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MemoryRoute = MemoryRouteImport.update({
-  id: '/memory',
-  path: '/memory',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpSetupRoute = McpSetupRouteImport.update({
-  id: '/mcp-setup',
-  path: '/mcp-setup',
+const QueueSettingsRoute = QueueSettingsRouteImport.update({
+  id: '/queue-settings',
+  path: '/queue-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -39,9 +29,19 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BriefingRoute = BriefingRouteImport.update({
-  id: '/briefing',
-  path: '/briefing',
+const LedgerRoute = LedgerRouteImport.update({
+  id: '/ledger',
+  path: '/ledger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FollowupRoute = FollowupRouteImport.update({
+  id: '/followup',
+  path: '/followup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -70,22 +70,22 @@ const Char91DotmcpChar93InvokeToolToolRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/briefing': typeof BriefingRoute
+  '/followup': typeof FollowupRoute
+  '/inbox': typeof InboxRoute
+  '/ledger': typeof LedgerRoute
   '/mcp': typeof McpRoute
-  '/mcp-setup': typeof McpSetupRoute
-  '/memory': typeof MemoryRoute
-  '/portfolio': typeof PortfolioRoute
+  '/queue-settings': typeof QueueSettingsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/briefing': typeof BriefingRoute
+  '/followup': typeof FollowupRoute
+  '/inbox': typeof InboxRoute
+  '/ledger': typeof LedgerRoute
   '/mcp': typeof McpRoute
-  '/mcp-setup': typeof McpSetupRoute
-  '/memory': typeof MemoryRoute
-  '/portfolio': typeof PortfolioRoute
+  '/queue-settings': typeof QueueSettingsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -93,11 +93,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/briefing': typeof BriefingRoute
+  '/followup': typeof FollowupRoute
+  '/inbox': typeof InboxRoute
+  '/ledger': typeof LedgerRoute
   '/mcp': typeof McpRoute
-  '/mcp-setup': typeof McpSetupRoute
-  '/memory': typeof MemoryRoute
-  '/portfolio': typeof PortfolioRoute
+  '/queue-settings': typeof QueueSettingsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -106,33 +106,33 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/briefing'
+    | '/followup'
+    | '/inbox'
+    | '/ledger'
     | '/mcp'
-    | '/mcp-setup'
-    | '/memory'
-    | '/portfolio'
+    | '/queue-settings'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/briefing'
+    | '/followup'
+    | '/inbox'
+    | '/ledger'
     | '/mcp'
-    | '/mcp-setup'
-    | '/memory'
-    | '/portfolio'
+    | '/queue-settings'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
-    | '/briefing'
+    | '/followup'
+    | '/inbox'
+    | '/ledger'
     | '/mcp'
-    | '/mcp-setup'
-    | '/memory'
-    | '/portfolio'
+    | '/queue-settings'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
@@ -140,11 +140,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BriefingRoute: typeof BriefingRoute
+  FollowupRoute: typeof FollowupRoute
+  InboxRoute: typeof InboxRoute
+  LedgerRoute: typeof LedgerRoute
   McpRoute: typeof McpRoute
-  McpSetupRoute: typeof McpSetupRoute
-  MemoryRoute: typeof MemoryRoute
-  PortfolioRoute: typeof PortfolioRoute
+  QueueSettingsRoute: typeof QueueSettingsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -152,25 +152,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/portfolio': {
-      id: '/portfolio'
-      path: '/portfolio'
-      fullPath: '/portfolio'
-      preLoaderRoute: typeof PortfolioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/memory': {
-      id: '/memory'
-      path: '/memory'
-      fullPath: '/memory'
-      preLoaderRoute: typeof MemoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp-setup': {
-      id: '/mcp-setup'
-      path: '/mcp-setup'
-      fullPath: '/mcp-setup'
-      preLoaderRoute: typeof McpSetupRouteImport
+    '/queue-settings': {
+      id: '/queue-settings'
+      path: '/queue-settings'
+      fullPath: '/queue-settings'
+      preLoaderRoute: typeof QueueSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -180,11 +166,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/briefing': {
-      id: '/briefing'
-      path: '/briefing'
-      fullPath: '/briefing'
-      preLoaderRoute: typeof BriefingRouteImport
+    '/ledger': {
+      id: '/ledger'
+      path: '/ledger'
+      fullPath: '/ledger'
+      preLoaderRoute: typeof LedgerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/followup': {
+      id: '/followup'
+      path: '/followup'
+      fullPath: '/followup'
+      preLoaderRoute: typeof FollowupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -220,11 +220,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BriefingRoute: BriefingRoute,
+  FollowupRoute: FollowupRoute,
+  InboxRoute: InboxRoute,
+  LedgerRoute: LedgerRoute,
   McpRoute: McpRoute,
-  McpSetupRoute: McpSetupRoute,
-  MemoryRoute: MemoryRoute,
-  PortfolioRoute: PortfolioRoute,
+  QueueSettingsRoute: QueueSettingsRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
