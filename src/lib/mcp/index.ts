@@ -1,5 +1,6 @@
 import { defineMcp } from "@lovable.dev/mcp-js";
 import listDailyCandidates from "./tools/list_daily_candidates";
+import rankOpportunities from "./tools/rank_opportunities";
 import getBriefing from "./tools/get_briefing";
 import listMemory from "./tools/list_memory";
 import getPortfolio from "./tools/get_portfolio";
@@ -15,8 +16,9 @@ export default defineMcp({
   title: "ConvictionIQ",
   version: "0.1.0",
   instructions:
-    "Tools for ConvictionIQ, a single-user portfolio decision-support app. Read scored setups, briefing, memory, and holdings; ingest IBKR positions; record decisions with exit plans; advance the simulated day; and ask grounded questions about a specific ticker.",
+    "Tools for ConvictionIQ, a single-user portfolio decision-support app. Use rank_opportunities to score and filter the full ticker pool for today's Daily Screen shortlist. Use list_daily_candidates to query recorded recommendation history. Read briefing, memory, and holdings; ingest IBKR positions; record decisions with exit plans; advance the simulated day; and ask grounded questions about a specific ticker.",
   tools: [
+    rankOpportunities,
     listDailyCandidates,
     getBriefing,
     listMemory,
