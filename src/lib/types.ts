@@ -4,6 +4,12 @@
 
 export type AssetClass = "US Options" | "SG Stock" | "HK Stock" | "Crypto";
 export type ActionType = "ledger" | "followup";
+// Canonical action intents written by CoWork; file contract uses these four values.
+export type SuggestedAction =
+  | "Add / Approve"
+  | "Hold"
+  | "Trim / Take Profit"
+  | "Exit / Cut Loss";
 
 export interface CoWorkAnalysis {
   id: string;
