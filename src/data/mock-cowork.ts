@@ -181,7 +181,7 @@ export const MOCK_INBOX: CoWorkAnalysis[] = [
   },
 ];
 
-// ── Pre-seeded actioned records (3 records) ─────────────────────────────────
+// ── Pre-seeded actioned records (5 records) ─────────────────────────────────
 
 export const MOCK_DECISIONS: ActionedRecord[] = [
   {
@@ -197,6 +197,11 @@ export const MOCK_DECISIONS: ActionedRecord[] = [
     actioned_at: "2026-06-28",
     action_type: "ledger",
     decision_notes: "Opened Jul 19 $210P for $2.15 credit. Max profit $215/contract.",
+    sub_type: "Cash-Secured Put",
+    decision_label: "Accepted",
+    score_at_decision: 82,
+    price_at_decision: 213.5,
+    notes_log: [],
   },
   {
     id: "cw-102",
@@ -211,6 +216,11 @@ export const MOCK_DECISIONS: ActionedRecord[] = [
     actioned_at: "2026-06-27",
     action_type: "ledger",
     decision_notes: "Bought 200 shares at $37.80. Stop at $36.50 (kijun). Div yield 5.2%.",
+    sub_type: "Long Equity",
+    decision_label: "Accepted",
+    score_at_decision: 71,
+    price_at_decision: 37.8,
+    notes_log: [],
   },
   {
     id: "cw-103",
@@ -225,6 +235,51 @@ export const MOCK_DECISIONS: ActionedRecord[] = [
     actioned_at: "2026-06-25",
     action_type: "ledger",
     decision_notes: "Sold BTC $90k put 30 DTE for 0.8 BTC premium. Sized at 5% NAV.",
+    sub_type: "Cash-Secured Put",
+    decision_label: "Accepted",
+    score_at_decision: 88,
+    price_at_decision: 96500,
+    notes_log: [],
+  },
+  {
+    id: "cw-104",
+    ticker: "NVDA",
+    asset_class: "US Options",
+    exchange: "NASDAQ",
+    color_band: "SuperGreen",
+    signal_label: "WATCH",
+    suggested_action: "Re-evaluate once pullback to kijun completes",
+    analyst_note: "Extended above cloud. Waiting for mean reversion.",
+    analysed_at: "2026-07-02",
+    actioned_at: "2026-07-02",
+    action_type: "followup",
+    decision_notes: "Scheduling review — extended 8% above kijun, wait for compression.",
+    sub_type: "Long Equity",
+    decision_label: "Watch Only",
+    score_at_decision: 75,
+    price_at_decision: 142.3,
+    notes_log: [],
+    followup_at: "2026-07-10",
+  },
+  {
+    id: "cw-105",
+    ticker: "0700.HK",
+    asset_class: "HK Stock",
+    exchange: "HKEX",
+    color_band: "LightGreen",
+    signal_label: "WATCHLIST",
+    suggested_action: "Confirm 2 closes above senkou A before entering",
+    analyst_note: "Cloud re-entry setup — needs confirmation closes.",
+    analysed_at: "2026-07-01",
+    actioned_at: "2026-07-01",
+    action_type: "followup",
+    decision_notes: "Watching for second close above senkou A. Target $400 if confirmed.",
+    sub_type: "Long Equity",
+    decision_label: "Watch Only",
+    score_at_decision: 68,
+    price_at_decision: 376.0,
+    notes_log: [],
+    followup_at: "2026-07-01",
   },
 ];
 

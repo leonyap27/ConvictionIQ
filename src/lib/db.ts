@@ -42,6 +42,32 @@ class ConvictionDB extends Dexie {
       decisions: "id, ticker, asset_class, actioned_at, action_type",
       followup: "id, ticker, asset_class, followup_at",
     });
+    this.version(4)
+      .stores({
+        recommendations: "id, ticker, status, createdAt, updatedAt",
+        monitoringLog: "id, recordId, date, [recordId+date]",
+        holdings: "id, ticker, sector",
+        rules: "id",
+        inbox: "id, ticker, asset_class, analysed_at",
+        decisions:
+          "id, ticker, asset_class, actioned_at, action_type, decision_label, sub_type",
+        followup: "id, ticker, asset_class, followup_at",
+      })
+      .upgrade((tx) =>
+        tx
+          .table("decisions")
+          .toCollection()
+          .modify((rec: Record<string, unknown>) => {
+            if (rec["sub_type"] === undefined) rec["sub_type"] = "Long Equity";
+            if (rec["decision_label"] === undefined)
+              rec["decision_label"] = "Accepted";
+            if (rec["score_at_decision"] === undefined)
+              rec["score_at_decision"] = 0;
+            if (rec["price_at_decision"] === undefined)
+              rec["price_at_decision"] = 0;
+            if (rec["notes_log"] === undefined) rec["notes_log"] = [];
+          }),
+      );
   }
 }
 
@@ -85,9 +111,21 @@ export async function appendMonitoringLog(
   await db.monitoringLog.put(entry);
 }
 
+export async function updateDecisionNotes(
+  id: string,
+  note: string,
+): Promise<void> {
+  const rec = await db.decisions.get(id);
+  if (!rec) return;
+  const entry = `${new Date().toISOString()}: ${note}`;
+  rec.notes_log = [...(rec.notes_log ?? []), entry];
+  rec.decision_notes = note;
+  await db.decisions.put(rec);
+}
+
 // ── Queue App Shell seed ─────────────────────────────────────────────────────
 
-const COWORK_SEED_KEY = "convictioniq_cowork_seed_v1";
+const COWORK_SEED_KEY = "convictioniq_cowork_seed_v2";
 
 export async function seedCoWorkData(): Promise<void> {
   if (localStorage.getItem(COWORK_SEED_KEY)) return;

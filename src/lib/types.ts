@@ -27,6 +27,12 @@ export interface ActionedRecord extends CoWorkAnalysis {
   actioned_at: string; // ISO date
   action_type: ActionType;
   decision_notes: string;
+  sub_type: Strategy;
+  decision_label: DecisionLabel;
+  score_at_decision: number;
+  price_at_decision: number;
+  notes_log: string[];
+  followup_at?: string; // ISO date, present when action_type = "followup"
 }
 
 export interface FollowUpRecord extends CoWorkAnalysis {
