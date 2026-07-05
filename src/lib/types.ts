@@ -1,5 +1,35 @@
 // Domain types for ConvictionIQ
 
+// ── Queue App Shell types ──────────────────────────────────────────────────
+
+export type AssetClass = "US Options" | "SG Stock" | "HK Stock" | "Crypto";
+export type ActionType = "ledger" | "followup";
+
+export interface CoWorkAnalysis {
+  id: string;
+  ticker: string;
+  asset_class: AssetClass;
+  exchange: string; // "NASDAQ", "SGX", "HKEX", "Global"
+  color_band: ColorBand;
+  signal_label: SignalLabel;
+  suggested_action: string;
+  analyst_note: string;
+  analysed_at: string; // ISO date
+}
+
+export interface ActionedRecord extends CoWorkAnalysis {
+  actioned_at: string; // ISO date
+  action_type: ActionType;
+  decision_notes: string;
+}
+
+export interface FollowUpRecord extends CoWorkAnalysis {
+  followup_at: string; // ISO date when to revisit
+  reminder_note: string;
+}
+
+// ── End Queue App Shell types ──────────────────────────────────────────────
+
 export type ColorBand = "SuperGreen" | "LightGreen" | "Pink" | "SuperRed";
 export type SignalLabel =
   "SELL PUT" | "WATCH" | "WATCHLIST" | "AVOID" | "EXIT ALERT" | "HOLD";
