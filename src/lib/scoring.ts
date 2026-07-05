@@ -149,6 +149,11 @@ export function toStrategy(signal: SignalLabel): Strategy {
   return "Long Equity";
 }
 
+// Portfolio signal: binary HOLD or EXIT ALERT based solely on Ichimoku cloud position.
+export function toPortfolioSignal(kumoDistancePct: number): SignalLabel {
+  return kumoDistancePct <= EXIT_ALERT_KUMO_DISTANCE_PCT ? "EXIT ALERT" : "HOLD";
+}
+
 export interface ScoreOptions {
   asOfDate: string;
   historyLength?: number; // slice ohlc up to this length for time-travel

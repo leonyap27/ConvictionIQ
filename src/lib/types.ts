@@ -2,7 +2,28 @@
 
 export type ColorBand = "SuperGreen" | "LightGreen" | "Pink" | "SuperRed";
 export type SignalLabel =
-  "SELL PUT" | "WATCH" | "WATCHLIST" | "AVOID" | "EXIT ALERT";
+  "SELL PUT" | "WATCH" | "WATCHLIST" | "AVOID" | "EXIT ALERT" | "HOLD";
+
+export type Theme =
+  | "US Mega Cap"
+  | "US Tech & AI"
+  | "US Financials"
+  | "US Healthcare"
+  | "US Energy"
+  | "US Consumer"
+  | "US Industrials"
+  | "US ETFs"
+  | "SG Blue Chip"
+  | "SG REITs"
+  | "SG Financials";
+
+export interface RuleSet {
+  id: string;
+  includedThemes: Theme[];
+  minCompositeScore: number;
+  excludedTickers: string[];
+  maxDisplay: number;
+}
 export type Strategy = "Cash-Secured Put" | "Long Equity" | "Covered Call";
 export type Regime = "Bullish" | "Neutral" | "Bearish";
 export type DecisionLabel =
@@ -45,6 +66,7 @@ export interface TickerData {
   ticker: string;
   companyName: string;
   sector: string;
+  theme: Theme;
   ohlc: OHLC[]; // 60+ days
   options: OptionContract[];
   earningsInDays: number | null; // days until next earnings, null if unknown/none soon

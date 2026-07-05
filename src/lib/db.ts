@@ -4,12 +4,14 @@ import type {
   Holding,
   MonitoringLogEntry,
   RecommendationRecord,
+  RuleSet,
 } from "./types";
 
 class ConvictionDB extends Dexie {
   recommendations!: Table<RecommendationRecord, string>;
   monitoringLog!: Table<MonitoringLogEntry, string>;
   holdings!: Table<Holding, string>;
+  rules!: Table<RuleSet, string>;
 
   constructor() {
     super("convictioniq");
@@ -17,6 +19,12 @@ class ConvictionDB extends Dexie {
       recommendations: "id, ticker, status, createdAt, updatedAt",
       monitoringLog: "id, recordId, date, [recordId+date]",
       holdings: "id, ticker, sector",
+    });
+    this.version(2).stores({
+      recommendations: "id, ticker, status, createdAt, updatedAt",
+      monitoringLog: "id, recordId, date, [recordId+date]",
+      holdings: "id, ticker, sector",
+      rules: "id",
     });
   }
 }

@@ -1,8 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ColorBand, SignalLabel, Strategy } from "./types";
+import type { ColorBand, SignalLabel, Strategy, Theme } from "./types";
+import { DEFAULT_RULES } from "./constants";
 
-interface AppState {
+interface RulesState {
+  includedThemes: Theme[];
+  minCompositeScore: number;
+  excludedTickers: string[];
+  maxDisplay: number;
+  setIncludedThemes: (themes: Theme[]) => void;
+  setMinCompositeScore: (n: number) => void;
+  setExcludedTickers: (tickers: string[]) => void;
+  setMaxDisplay: (n: number) => void;
+  resetRules: () => void;
+}
+
+interface AppState extends RulesState {
   currentDate: string; // ISO date — simulated "today", can be advanced
   setCurrentDate: (d: string) => void;
   advanceDay: () => void;
@@ -42,10 +55,33 @@ export const useAppStore = create<AppState>()(
       setFilterStrategy: (s) => set({ filterStrategy: s }),
       resetFilters: () =>
         set({ filterSignal: "All", filterBand: "All", filterStrategy: "All" }),
+
+      // Rules — persisted to localStorage
+      includedThemes: [...DEFAULT_RULES.includedThemes],
+      minCompositeScore: DEFAULT_RULES.minCompositeScore,
+      excludedTickers: [...DEFAULT_RULES.excludedTickers],
+      maxDisplay: DEFAULT_RULES.maxDisplay,
+      setIncludedThemes: (themes) => set({ includedThemes: themes }),
+      setMinCompositeScore: (n) => set({ minCompositeScore: n }),
+      setExcludedTickers: (tickers) => set({ excludedTickers: tickers }),
+      setMaxDisplay: (n) => set({ maxDisplay: n }),
+      resetRules: () =>
+        set({
+          includedThemes: [...DEFAULT_RULES.includedThemes],
+          minCompositeScore: DEFAULT_RULES.minCompositeScore,
+          excludedTickers: [...DEFAULT_RULES.excludedTickers],
+          maxDisplay: DEFAULT_RULES.maxDisplay,
+        }),
     }),
     {
       name: "convictioniq_ui_v1",
-      partialize: (s) => ({ currentDate: s.currentDate }),
+      partialize: (s) => ({
+        currentDate: s.currentDate,
+        includedThemes: s.includedThemes,
+        minCompositeScore: s.minCompositeScore,
+        excludedTickers: s.excludedTickers,
+        maxDisplay: s.maxDisplay,
+      }),
     },
   ),
 );

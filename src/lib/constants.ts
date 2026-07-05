@@ -1,4 +1,4 @@
-import type { ColorBand, SignalLabel } from "./types";
+import type { ColorBand, SignalLabel, Theme } from "./types";
 
 export const ROUTES = {
   daily: "/",
@@ -61,7 +61,45 @@ export const SIGNAL_CHIP_CLASS: Record<SignalLabel, string> = {
   WATCHLIST: "bg-signal-watchlist text-white",
   AVOID: "bg-signal-avoid text-white",
   "EXIT ALERT": "bg-signal-exit text-white",
+  HOLD: "bg-emerald-700 text-white",
 };
+
+export const ALL_THEMES: Theme[] = [
+  "US Mega Cap",
+  "US Tech & AI",
+  "US Financials",
+  "US Healthcare",
+  "US Energy",
+  "US Consumer",
+  "US Industrials",
+  "US ETFs",
+  "SG Blue Chip",
+  "SG REITs",
+  "SG Financials",
+];
+
+export const SECTOR_TO_THEME: Record<string, Theme> = {
+  Technology: "US Tech & AI",
+  Financials: "US Financials",
+  Healthcare: "US Healthcare",
+  Energy: "US Energy",
+  "Consumer Discretionary": "US Consumer",
+  "Consumer Staples": "US Consumer",
+  Communication: "US Tech & AI",
+  Industrials: "US Industrials",
+  Utilities: "US Industrials",
+  Materials: "US Industrials",
+  "Real Estate": "US ETFs",
+  "Index ETF": "US ETFs",
+  "Commodity ETF": "US ETFs",
+};
+
+export const DEFAULT_RULES = {
+  includedThemes: [] as Theme[], // empty = all themes
+  minCompositeScore: 0,
+  excludedTickers: [] as string[],
+  maxDisplay: 15,
+} as const;
 
 export const DECISION_LABELS = [
   "Accepted",
