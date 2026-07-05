@@ -274,8 +274,12 @@ export function InboxScreen() {
   }
 
   async function addToFollowUp() {
+    const raw = localStorage.getItem("convictioniq_queue_settings_v1");
+    const offset = raw
+      ? (JSON.parse(raw) as { defaultFollowupOffset?: number }).defaultFollowupOffset ?? 7
+      : 7;
     const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 7);
+    futureDate.setDate(futureDate.getDate() + offset);
     const followup_at = futureDate.toISOString().slice(0, 10);
 
     for (const r of selectedList) {
