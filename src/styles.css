@@ -49,6 +49,9 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
+  --color-urgency-overdue: var(--urgency-overdue);
+  --color-urgency-soon: var(--urgency-soon);
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -95,6 +98,10 @@
   --signal-watchlist: oklch(0.62 0.03 250);
   --signal-avoid: oklch(0.58 0.09 30);
   --signal-exit: oklch(0.60 0.22 25);
+
+  /* Urgency row tints */
+  --urgency-overdue: oklch(0.36 0.12 50 / 0.50);
+  --urgency-soon: oklch(0.36 0.09 85 / 0.35);
 }
 
 @layer base {
@@ -121,4 +128,10 @@
 }
 @utility band-superred {
   background-color: var(--band-superred);
+}
+@utility urgency-overdue {
+  background-color: var(--urgency-overdue);
+}
+@utility urgency-soon {
+  background-color: var(--urgency-soon);
 }

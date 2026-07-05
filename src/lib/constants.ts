@@ -1,4 +1,4 @@
-import type { ColorBand, SignalLabel, Theme } from "./types";
+import type { ColorBand, DecisionLabel, SignalLabel, Theme } from "./types";
 
 export const ROUTES = {
   inbox: "/inbox",
@@ -60,6 +60,15 @@ export const SIGNAL_CHIP_CLASS: Record<SignalLabel, string> = {
   AVOID: "bg-signal-avoid text-white",
   "EXIT ALERT": "bg-signal-exit text-white",
   HOLD: "bg-emerald-700 text-white",
+};
+
+export const DECISION_CHIP_CLASS: Record<DecisionLabel, string> = {
+  "Accepted":       "bg-signal-sellput text-white",
+  "Modified":       "bg-signal-sellput/70 text-white",
+  "Rejected":       "bg-band-pink-fg/20 text-band-pink-fg border border-band-pink-fg/40",
+  "Watch Only":     "bg-signal-avoid/20 text-signal-avoid border border-signal-avoid/40",
+  "Closed":         "bg-muted text-muted-foreground",
+  "Lesson Learned": "bg-muted text-muted-foreground",
 };
 
 export const ALL_THEMES: Theme[] = [

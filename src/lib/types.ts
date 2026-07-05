@@ -193,6 +193,7 @@ export interface RecommendationRecord {
   originalStudyCard: StudyCard;
   decision: Decision | null;
   notes: string;
+  nextReviewDate?: string; // ISO date, e.g. "2026-07-15"
 }
 
 export interface MonitoringLogEntry {

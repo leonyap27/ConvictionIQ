@@ -2,9 +2,10 @@ import { cn } from "@/lib/utils";
 import {
   BAND_CHIP_CLASS,
   BAND_LABEL,
+  DECISION_CHIP_CLASS,
   SIGNAL_CHIP_CLASS,
 } from "@/lib/constants";
-import type { ColorBand, SignalLabel } from "@/lib/types";
+import type { ColorBand, DecisionLabel, SignalLabel } from "@/lib/types";
 
 export function BandChip({
   band,
@@ -42,6 +43,16 @@ export function SignalChip({
       )}
     >
       {signal}
+    </span>
+  );
+}
+
+export function DecisionChip({ label }: { label: DecisionLabel }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase tracking-wide ${DECISION_CHIP_CLASS[label]}`}
+    >
+      {label}
     </span>
   );
 }
