@@ -5,6 +5,7 @@ import type { FollowUpRecord } from "@/lib/types";
 import { BandChip, SignalChip } from "@/components/Chips";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { Bell, CheckCircle2 } from "lucide-react";
 
 function formatDate(iso: string): string {
@@ -25,6 +26,16 @@ function daysUntil(iso: string): number {
   today.setHours(0, 0, 0, 0);
   target.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - today.getTime()) / 86_400_000);
+}
+
+function urgencyClass(followupAt: string): string {
+  const today = new Date().toISOString().split("T")[0];
+  if (followupAt < today) return "urgency-overdue";
+  const soonDate = new Date();
+  soonDate.setDate(soonDate.getDate() + 3);
+  const soon = soonDate.toISOString().split("T")[0];
+  if (followupAt <= soon) return "urgency-soon";
+  return "";
 }
 
 function DueLabel({ iso }: { iso: string }) {
@@ -132,7 +143,10 @@ export function FollowUpScreen() {
           {records.map((r: FollowUpRecord) => (
             <div
               key={r.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-start"
+              className={cn(
+                "flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-start transition-colors",
+                urgencyClass(r.followup_at),
+              )}
             >
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">

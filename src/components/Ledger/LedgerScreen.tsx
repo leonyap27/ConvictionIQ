@@ -6,6 +6,7 @@ import { BandChip, SignalChip } from "@/components/Chips";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { ActionType, AssetClass } from "@/lib/types";
+import { BAND_ROW_CLASS } from "@/lib/constants";
 import { BookOpen } from "lucide-react";
 
 const ASSET_CLASS_OPTIONS: Array<AssetClass | "All"> = [
@@ -70,7 +71,7 @@ function LedgerSkeleton() {
       <table className="w-full text-sm">
         <thead className="bg-card text-xs uppercase text-muted-foreground">
           <tr>
-            {["Ticker", "Asset Class", "Band", "Signal", "Action", "Notes", "Actioned"].map(
+            {["Ticker", "Asset Class", "Band", "Signal", "Action", "Analyst Note", "Decision Notes", "Actioned"].map(
               (col) => (
                 <th key={col} className="px-3 py-2.5 text-left font-medium tracking-wide">
                   {col}
@@ -87,6 +88,7 @@ function LedgerSkeleton() {
               <td className="px-3 py-3"><Skeleton className="h-5 w-20 rounded-md" /></td>
               <td className="px-3 py-3"><Skeleton className="h-5 w-20 rounded-md" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-14" /></td>
+              <td className="px-3 py-3"><Skeleton className="h-4 w-36" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-40" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-20" /></td>
             </tr>
@@ -202,6 +204,9 @@ export function LedgerScreen() {
                     Action Type
                   </th>
                   <th className="px-3 py-2.5 text-left font-medium tracking-wide">
+                    Analyst Note
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-medium tracking-wide">
                     Decision Notes
                   </th>
                   <th className="px-3 py-2.5 text-left font-medium tracking-wide">
@@ -213,7 +218,10 @@ export function LedgerScreen() {
                 {filtered.map((r: ActionedRecord) => (
                   <tr
                     key={r.id}
-                    className="transition-colors hover:bg-accent/20"
+                    className={cn(
+                      "transition-colors hover:brightness-110",
+                      BAND_ROW_CLASS[r.color_band],
+                    )}
                   >
                     <td className="px-3 py-3">
                       <div className="font-mono text-sm font-semibold">
@@ -244,7 +252,17 @@ export function LedgerScreen() {
                         {ACTION_TYPE_LABEL[r.action_type as ActionType]}
                       </span>
                     </td>
-                    <td className="px-3 py-3 max-w-[280px]">
+                    <td className="px-3 py-3 max-w-[240px]">
+                      <span className="text-sm text-foreground/70">
+                        {(r.analyst_note === "Baseline" || r.analyst_note === "") && (
+                          <span className="text-warning mr-1" aria-label="Baseline note">⚠</span>
+                        )}
+                        {r.analyst_note || (
+                          <span className="italic text-muted-foreground/50">—</span>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 max-w-[240px]">
                       <span className="text-sm text-foreground/80">
                         {r.decision_notes || (
                           <span className="italic text-muted-foreground/60">
