@@ -1,13 +1,13 @@
 import { useMemo, useState, useEffect } from "react";
 import { liveQuery } from "dexie";
 import { db } from "@/lib/db";
-import type { ActionedRecord } from "@/lib/types";
+import type { ActionedRecord, FollowUpRecord } from "@/lib/types";
 import type { ActionType, AssetClass, DecisionLabel, Strategy } from "@/lib/types";
 import { BandChip, SignalChip, DecisionChip } from "@/components/Chips";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { BAND_ROW_CLASS } from "@/lib/constants";
-import { BookOpen, Eye } from "lucide-react";
+import { BookOpen, Eye, CheckCircle2, Clock } from "lucide-react";
 import { DecisionDetail } from "./DecisionDetail";
 
 // ── Filter options ────────────────────────────────────────────────────────────
@@ -97,6 +97,30 @@ function FollowupBadge({ status }: { status: "N/A" | "Pending" | "Overdue" }) {
   );
 }
 
+/**
+ * Shows the queue workflow status (Open / Completed) for follow-up rows.
+ * Populated via cross-table liveQuery on db.followup.
+ */
+function FollowupQueueBadge({ queueStatus }: { queueStatus: "open" | "completed" | null }) {
+  if (queueStatus === null) {
+    return <span className="text-xs text-muted-foreground/50">—</span>;
+  }
+  if (queueStatus === "completed") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
+        <CheckCircle2 className="h-3 w-3 shrink-0" />
+        Completed
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+      <Clock className="h-3 w-3 shrink-0" />
+      Open
+    </span>
+  );
+}
+
 function FilterPill({
   active,
   onClick,
@@ -130,7 +154,7 @@ function LedgerSkeleton() {
       <table className="w-full text-sm">
         <thead className="bg-card text-xs uppercase text-muted-foreground">
           <tr>
-            {["Ticker", "Asset Class", "Band", "Signal", "Strategy", "Decision", "Score", "Price", "Notes", "Follow-up", "Actioned", ""].map(
+            {["Ticker", "Asset Class", "Band", "Signal", "Strategy", "Decision", "Score", "Price", "Notes", "Follow-up", "Queue Status", "Actioned", ""].map(
               (col) => (
                 <th key={col} className="px-3 py-2.5 text-left font-medium tracking-wide">
                   {col}
@@ -152,6 +176,7 @@ function LedgerSkeleton() {
               <td className="px-3 py-3"><Skeleton className="h-4 w-16" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-36" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-16" /></td>
+              <td className="px-3 py-3"><Skeleton className="h-5 w-20 rounded-md" /></td>
               <td className="px-3 py-3"><Skeleton className="h-4 w-20" /></td>
               <td className="px-3 py-3"><Skeleton className="h-6 w-6 rounded" /></td>
             </tr>
@@ -172,6 +197,23 @@ export function LedgerScreen() {
     ).subscribe({
       next: (data) => setRecords(data),
       error: (err) => console.error("Ledger query error:", err),
+    });
+    return () => sub.unsubscribe();
+  }, []);
+
+  // CIQ-13: cross-table liveQuery to get follow-up queue status for each ticker
+  // Maps followup record id → "open" | "completed"
+  const [followupStatusMap, setFollowupStatusMap] = useState<Map<string, "open" | "completed">>(new Map());
+  useEffect(() => {
+    const sub = liveQuery(() => db.followup.toArray()).subscribe({
+      next: (fuRecords: FollowUpRecord[]) => {
+        const map = new Map<string, "open" | "completed">();
+        for (const fu of fuRecords) {
+          map.set(fu.id, (fu.status ?? "open") as "open" | "completed");
+        }
+        setFollowupStatusMap(map);
+      },
+      error: (err) => console.error("Followup status query error:", err),
     });
     return () => sub.unsubscribe();
   }, []);
@@ -301,6 +343,7 @@ export function LedgerScreen() {
                     <th className="px-3 py-2.5 text-right font-medium tracking-wide">Price</th>
                     <th className="px-3 py-2.5 text-left font-medium tracking-wide">Notes</th>
                     <th className="px-3 py-2.5 text-left font-medium tracking-wide">Follow-up</th>
+                    <th className="px-3 py-2.5 text-left font-medium tracking-wide">Queue Status</th>
                     <th className="px-3 py-2.5 text-left font-medium tracking-wide">Actioned</th>
                     <th className="px-3 py-2.5" />
                   </tr>
@@ -308,6 +351,11 @@ export function LedgerScreen() {
                 <tbody className="divide-y divide-border">
                   {filtered.map((r: ActionedRecord) => {
                     const fuStatus = computeFollowupStatus(r);
+                    // CIQ-13: queue workflow status — only meaningful for followup rows
+                    const queueStatus: "open" | "completed" | null =
+                      r.action_type === "followup"
+                        ? (followupStatusMap.get(r.id) ?? "open")
+                        : null;
                     return (
                       <tr
                         key={r.id}
@@ -356,6 +404,9 @@ export function LedgerScreen() {
                         </td>
                         <td className="px-3 py-3">
                           <FollowupBadge status={fuStatus} />
+                        </td>
+                        <td className="px-3 py-3">
+                          <FollowupQueueBadge queueStatus={queueStatus} />
                         </td>
                         <td className="px-3 py-3 text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                           {formatDate(r.actioned_at)}
