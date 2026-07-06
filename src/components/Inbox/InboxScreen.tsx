@@ -287,6 +287,15 @@ export function InboxScreen() {
         ...r,
         followup_at,
         reminder_note: "",
+        // CIQ-13: new workflow fields — undefined until CoWork supplies them
+        status: "open",
+        trigger_conditions: undefined,
+        completion_date: undefined,
+        completion_note: undefined,
+        sub_type: undefined,
+        strategy: undefined,
+        decision_label: undefined,
+        expected_outcome: undefined,
       };
       await db.followup.add(fu);
       await db.inbox.delete(r.id);
