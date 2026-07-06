@@ -38,6 +38,16 @@ export interface ActionedRecord extends CoWorkAnalysis {
 export interface FollowUpRecord extends CoWorkAnalysis {
   followup_at: string; // ISO date when to revisit
   reminder_note: string;
+  // CIQ-13 workflow fields
+  status?: "open" | "completed"; // undefined treated as "open"
+  completion_date?: string; // ISO date — set when status → "completed"
+  completion_note?: string; // mandatory when closing
+  trigger_conditions?: string; // updated on Mark Reviewed → Reschedule
+  // Optional CoWork metadata (populated from InboxScreen addToFollowUp)
+  sub_type?: string;
+  strategy?: string;
+  decision_label?: string;
+  expected_outcome?: string;
 }
 
 // ── End Queue App Shell types ──────────────────────────────────────────────
