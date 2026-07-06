@@ -68,6 +68,27 @@ class ConvictionDB extends Dexie {
             if (rec["notes_log"] === undefined) rec["notes_log"] = [];
           }),
       );
+    // CIQ-13: add status index on followup table for Open/Completed queries
+    this.version(5)
+      .stores({
+        recommendations: "id, ticker, status, createdAt, updatedAt",
+        monitoringLog: "id, recordId, date, [recordId+date]",
+        holdings: "id, ticker, sector",
+        rules: "id",
+        inbox: "id, ticker, asset_class, analysed_at",
+        decisions:
+          "id, ticker, asset_class, actioned_at, action_type, decision_label, sub_type",
+        followup: "id, ticker, asset_class, followup_at, status",
+      })
+      .upgrade((tx) =>
+        tx
+          .table("followup")
+          .toCollection()
+          .modify((rec: Record<string, unknown>) => {
+            // Existing records without status are treated as open
+            if (rec["status"] === undefined) rec["status"] = "open";
+          }),
+      );
   }
 }
 
@@ -123,9 +144,76 @@ export async function updateDecisionNotes(
   await db.decisions.put(rec);
 }
 
+// ── Follow-up Queue workflow helpers (CIQ-13) ────────────────────────────────
+
+/**
+ * Mark Reviewed with Reschedule ON:
+ * item stays Open, next review date and trigger conditions updated.
+ */
+export async function markReviewedReschedule(
+  id: string,
+  newFollowupAt: string,
+  triggerConditions: string,
+): Promise<void> {
+  const rec = await db.followup.get(id);
+  if (!rec) return;
+  await db.followup.put({
+    ...rec,
+    status: "open",
+    followup_at: newFollowupAt,
+    trigger_conditions: triggerConditions,
+  });
+}
+
+/**
+ * Mark Reviewed with Reschedule OFF:
+ * item moves to Completed with today's date as completion date.
+ */
+export async function markReviewedComplete(id: string): Promise<void> {
+  const rec = await db.followup.get(id);
+  if (!rec) return;
+  const today = new Date().toISOString().slice(0, 10);
+  await db.followup.put({
+    ...rec,
+    status: "completed",
+    completion_date: today,
+  });
+}
+
+/**
+ * Close: requires a mandatory completion note.
+ * Sets status to "completed" and records the note.
+ */
+export async function closeFollowUp(
+  id: string,
+  completionNote: string,
+): Promise<void> {
+  const rec = await db.followup.get(id);
+  if (!rec) return;
+  const today = new Date().toISOString().slice(0, 10);
+  await db.followup.put({
+    ...rec,
+    status: "completed",
+    completion_date: today,
+    completion_note: completionNote,
+  });
+}
+
+/**
+ * Update completion note inline (Completed tab editable field).
+ */
+export async function updateFollowUpCompletionNote(
+  id: string,
+  note: string,
+): Promise<void> {
+  const rec = await db.followup.get(id);
+  if (!rec) return;
+  await db.followup.put({ ...rec, completion_note: note });
+}
+
 // ── Queue App Shell seed ─────────────────────────────────────────────────────
 
-const COWORK_SEED_KEY = "convictioniq_cowork_seed_v2";
+const COWORK_SEED_KEY = "convictioniq_cowork_seed_v3";
 
 export async function seedCoWorkData(): Promise<void> {
   if (localStorage.getItem(COWORK_SEED_KEY)) return;
